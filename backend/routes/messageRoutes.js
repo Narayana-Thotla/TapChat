@@ -1,12 +1,13 @@
 import express from 'express'
-import { sendMessage } from '../controllers/messageController.js'
-import  protectRoute  from '../../middleware/protectRoute.js'
+import { getMessage ,sendMessage } from '../controllers/messageController.js'
+import  protectRoute  from '../middleware/protectRoute.js'
 import cookieParser from 'cookie-parser'
 const router = express.Router()
 
 const app = express();
 app.use(cookieParser())
 
+router.get('/:id',protectRoute,getMessage)
 router.post('/send/:id',protectRoute,sendMessage)
 
 

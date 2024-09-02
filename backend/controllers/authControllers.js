@@ -4,6 +4,9 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import cookie from "cookie";
+import { promisify } from 'util';
+const genSalt = promisify(bcrypt.genSalt);
+const hash = promisify(bcrypt.hash);
 
 const app = express();
 app.use(cookieParser());
@@ -12,42 +15,46 @@ app.use(express.json());
 
 export const signin = async (req, res) => {
   const { username, name, password, gender } = req.body;
-  const userData = await userModel.findOne({ username: `${username}` });
-  var dd;
-  console.log(userData);
 
-  if (userData == null) {
-    const boyProfilePic = `https://avatar.iran.liara.run/public/boy?username=${username}`;
-    const girlProfilePic = `https://avatar.iran.liara.run/public/boy?username=${username}`;
-    
-    bcrypt.genSalt(10, function (err, salt) {
-      bcrypt.hash(password, salt, async function (err, hash) {
-        const docs = await userModel.create({
-          name: name,
-          username: username,
-          password: hash,
-          gender: gender,
-          profilepic: gender == "male" ? boyProfilePic : girlProfilePic,
-        });
-       console.log(docs)
+  try {
+    // Check if the user already exists
+    const userData = await userModel.findOne({ username });
+
+    if (!userData) {
+      const boyProfilePic = `https://avatar.iran.liara.run/public/boy?username=${username}`;
+      const girlProfilePic = `https://avatar.iran.liara.run/public/girl?username=${username}`;
+
+      // Generate salt and hash the password
+      const salt = await genSalt(10);
+      const hashedPassword = await hash(password, salt);
+
+      // Create new user
+      const newUser = await userModel.create({
+        name,
+        username,
+        password: hashedPassword,
+        gender,
+        profilepic: gender === "male" ? boyProfilePic : girlProfilePic,
       });
-    });
 
-    // console.log(dd._id)
-    var token = jwt.sign({ id:id }, process.env.cookieToken, {
-      // expiresIn: "15d",
-    });
-    res.cookie("token", token, {
-      // maxAge: 15 * 24 * 60 * 60 * 1000,
-      // httpOnly: true,
-      // sameSite: "strict",
-      // secure: process.env.NODE_ENV !== "developement",
-    });
+      // Generate token with user's _id
+      const token = jwt.sign({ id: newUser._id }, process.env.cookieToken);
 
-    res.status(201).json({ message: "sign up successfull" });
-  } else {
-    console.log("already exists");
-    res.status(400).json({ error: "invalid user data" });
+      // Set the cookie and send the response
+      res.cookie("token", token, {
+        maxAge: 15 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+        sameSite: "strict",
+        secure: process.env.NODE_ENV !== "development",
+      });
+
+      res.status(201).json({ message: "Sign up successful" });
+    } else {
+      res.status(400).json({ error: "User already exists" });
+    }
+  } catch (error) {
+    console.error("Error during sign in:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 

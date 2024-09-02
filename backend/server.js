@@ -7,6 +7,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import mongoose from "mongoose";
 import userModel from "./models/userModel.js";
+import userRoutes from "./routes/userRoutes.js"
 dotenv.config();
 
 const app = express();
@@ -27,14 +28,11 @@ app.use(
 
 
 app.use('/api/auth', authRoutes)
-app.use('/api/messages', messageRoutes)
+app.use('/api/message', messageRoutes)
+app.use('/api/user', userRoutes)
 
 
 
-
-// app.get("/", (req, res) => {
-//   res.send("Hello World hehehe!");
-// });
 
 
 app.listen(port, () => {
