@@ -5,10 +5,13 @@ import userModel from "../models/userModel.js";
 
 const protectRoute = async (req, res, next) => {
   try {
+    // const token = cookie.parse(req.headers.cookie || "");
     const token = cookie.parse(req.headers.cookie || "");
-    // console.log("given token:", token);
+
+    // console.log("given token:",token);
+    // console.log("given headers token :", req.headers);
     var decoded = jwt.verify(token.token, process.env.cookieToken);
-    // console.log("decoded.id", decoded.id);
+    // console.log("decoded.id -- line 11:", decoded.id);
 
     if (!token) {
        res.status(400).send("unauthorized , no token") 
@@ -23,7 +26,7 @@ const protectRoute = async (req, res, next) => {
 
     }
     req.user = user;
-    // console.log("userid-in-protectRoute:", req.user._id);
+    // console.log("userid-in-protectRoute:", req.user._id,user);
     next();
   } catch (error) {
     console.log("protected routing error", error.message);
