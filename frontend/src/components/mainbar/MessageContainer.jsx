@@ -5,16 +5,15 @@ import MessInput from "./MessInput";
 import { HiOutlineChatAlt2 } from "react-icons/hi";
 import useConversation from "/zustand/useConversation.js";
 import { useEffect } from "react";
+import { UseAuthContext } from "../../context/AuthContext";
 
 const MessageContainer = () => {
-  // const noChatSelected = false;
 
+   const username = UseAuthContext();
+   const nameOfUser = username.authUser.name
+   
   const { selectedConversation, setSelectedConversation ,setMessages} = useConversation();
-  // console.log(
-  //   "selectedconversation in message container line - 12:",
-  //   selectedConversation
-  // );
-
+  
   useEffect(() => {
     return () => {
       setSelectedConversation(null);
@@ -30,18 +29,18 @@ const MessageContainer = () => {
           <MessInput conversSelected={selectedConversation} />
         </div>
       ) : (
-        <NoMessage />
+        <NoMessage nameOfUser={nameOfUser}/>
       )}
     </>
   );
 };
 
-const NoMessage = () => {
+const NoMessage = ({nameOfUser}) => {
   return (
     <div className="w-[60%] flex justify-center items-center">
       <div className="flex  flex-col justify-center">
         <p className="font-extrabold text-gray-200 mx-auto">
-          Welcome 👋 lakshmi
+        { ` Welcome 👋 ${nameOfUser}`}
         </p>
         <p className="font-extrabold text-gray-200 mx-auto">
           Select a chat to start messaging

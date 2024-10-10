@@ -6,7 +6,6 @@ import { io } from "socket.io-client";
 export const SocketContext = createContext();
 
 export const UseSocketContext = () => {
-  // Return the context value
   const context = useContext(SocketContext);
 
   if (!context) {
@@ -23,8 +22,6 @@ export const SocketContextProvider = ({ children }) => {
   const [onlineUsers, setonlineUsers] = useState([]);
   const { authUser } = UseAuthContext();
 
-  // console.log(authUser);
-
   useEffect(() => {
     if (authUser) {
       const socket = io("http://localhost:3000", {
@@ -32,17 +29,10 @@ export const SocketContextProvider = ({ children }) => {
           userId: authUser._id,
         },
       });
-
-      // console.log("socket in socketContext:", socket);
       setsocket(socket);
       socket.on("getOnlineUsers", (users) => {
         setonlineUsers(users);
       });
-      //--------------------------------------------------------
-      // socket.on('nni',(mess)=>{
-      //   console.log("for socket on NI HOWLE:",mess)
-      // }  )
-      //--------------------------------------------------------
 
       return () => {
         socket.close();
@@ -54,12 +44,6 @@ export const SocketContextProvider = ({ children }) => {
       }
     }
   }, [authUser]);
-
-  // console.log(socket)
-
-  // useEffect(() => {
-
-  // }, [authUser])
 
   return (
     <SocketContext.Provider value={{ socket, onlineUsers }}>

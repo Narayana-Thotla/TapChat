@@ -20,27 +20,17 @@ io.on("connection", (socket) => {
 
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
-  // socket.emit('nm', 'Message from server');
   console.log("a user connected", socket.id, userSocketMap);
 
-  // console.log("inside server last:", userSocketMap["66d55bee7b3bffd755bb0bab"]);
   const someval = getReceiverId("66d55bee7b3bffd755bb0bab");
 
   console.log("inside server last lakshmi:", someval);
-
-  // socket.on('newMessage', (data) => {
-  //   console.log("New message received:", data);
-  //   // Broadcast the message to all connected clients
-  //   io.emit('newMessage', data);
-  // });
 
   socket.on('newMessage',(data)=>{
     
     console.log("New message received:", data);
   })
 
-  // socket.emit('newMessage', { text: "Welcome to the chat!" });
-  
 
 
 

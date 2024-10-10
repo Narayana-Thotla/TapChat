@@ -4,7 +4,6 @@ export const getUserForSidebar = async (req,res)=>{
 
     try {
         const loggedInUserId = req.user._id;
-        // console.log('loggedInUserId',loggedInUserId)
         const filterusers = await userModel.find({_id:{$ne:loggedInUserId}}).select("-password")
         res.send(filterusers)
     } catch (error) {

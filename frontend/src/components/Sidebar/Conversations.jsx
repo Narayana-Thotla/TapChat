@@ -6,7 +6,6 @@ import useGetConversation from "../../../hooks/useGetConversation.js";
 
 const Conversations = () => {
   const { loading, conversation } = useGetConversation();
-  // console.log("conversations in useGetConversation:", conversation);
 
   if (loading) {
     return <div className="loading loading-spinner">Loading...</div>; // Show a loading message

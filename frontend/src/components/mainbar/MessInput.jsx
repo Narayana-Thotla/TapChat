@@ -17,7 +17,6 @@ const MessInput = ({ conversSelected }) => {
     try {
       setloading(true);
 
-      // console.log(JSON.stringify({ message }));
 
       let response = await fetch(
         `http://localhost:3000/api/message/send/${conversSelected._id}`,
@@ -31,12 +30,8 @@ const MessInput = ({ conversSelected }) => {
         }
       );
 
-      // console.log("response in messinput line-34:", response);
       const data = await response.json();
        if(response.ok) setMessages([...(messages || []), data]);
-      // console.log("data message:", data);
-      // console.log("response in messINPUT.jsx:", response);
-
       setMessage("");
     } catch (error) {
       console.log("error in messinput.jsx line-37:", error);
