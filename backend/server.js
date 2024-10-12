@@ -19,7 +19,7 @@ const __dirname = path.resolve()
 
 
 mongoose.connect(
-  "mongodb+srv://lakshminarayanabharath08:Wrf0AnbW7cAk2XMj@cluster0.ofe7l.mongodb.net/"
+  process.env.mongodb
 );
 
 const corsOptions = {
