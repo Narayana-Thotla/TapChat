@@ -22,9 +22,23 @@ mongoose.connect(
   process.env.mongodb
 );
 
+// const corsOptions = {
+//   origin: "http://localhost:5173", // replace with your frontend URL (e.g., http://localhost:3000 for dev)
+//   credentials: true, // allow sending cookies
+// };
+
+const allowedOrigins = ['http://localhost:5173', 'https://tapchat-34hc.onrender.com'];
+
 const corsOptions = {
-  origin: "http://localhost:5173", // replace with your frontend URL (e.g., http://localhost:3000 for dev)
-  credentials: true, // allow sending cookies
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or Postman) or from allowed origins
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,  // Allow sending cookies and credentials
 };
 
 app.use(cors(corsOptions));
