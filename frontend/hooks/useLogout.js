@@ -12,7 +12,7 @@ const useLogout =  ()=>{
     const logOut = async () => {
         setloading(true)
         try {
-            let response = await fetch("http://localhost:3000/api/auth/logout", {
+            let response = await fetch("/api/auth/logout", {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
