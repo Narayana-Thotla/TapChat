@@ -5,6 +5,7 @@ import authRoutes from "./routes/authRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
 import bodyParser from "body-parser";
 import cors from "cors";
+import path from 'path';
 import mongoose from "mongoose";
 import userModel from "./models/userModel.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -13,6 +14,8 @@ dotenv.config();
 
 // const app = express();
 const port = process.env.PORT;
+
+const __dirname = path.resolve()
 
 
 mongoose.connect(
@@ -27,18 +30,18 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname,'/frontend','/dist')));
 app.use(bodyParser.json());
-app.use(
-  favicon(
-    "C:/Users/T.Lakshmi Narayana/Desktop/FULL_STACK_DEV/projects - Done/Chat-app//public/favicon.ico"
-  )
-);
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+
+
 
 app.use("/api/auth", authRoutes);
 app.use("/api/message", messageRoutes);
 app.use("/api/user", userRoutes);
-
+app.get("*",(req,res)=>{
+res.sendFile(path.join(__dirname,'frontend','dist','index.html'))
+})
 
 
 server.listen(port, () => {
