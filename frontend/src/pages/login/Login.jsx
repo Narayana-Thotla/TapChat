@@ -52,10 +52,10 @@ const Login = () => {
       toast.error("fill empty fields");
       return false;
     }
-    // if (formData.password.length < 6) {
-    //   toast.error("Password should > 6 characters");
-    //   return false;
-    // }
+    if (formData.password.length < 6) {
+      toast.error("Password should > 6 characters");
+      return false;
+    }
 
     try {
       setloading(true);
