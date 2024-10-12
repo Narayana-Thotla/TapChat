@@ -19,7 +19,7 @@ const MessInput = ({ conversSelected }) => {
 
 
       let response = await fetch(
-        `http://localhost:3000/api/message/send/${conversSelected._id}`,
+        `/api/message/send/${conversSelected._id}`,
         {
           method: "POST",
           headers: {

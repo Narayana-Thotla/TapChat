@@ -25,7 +25,7 @@ const MessChat = ({ conversSelected }) => {
 
         if (selectedConversation?._id) {
           let response = await fetch(
-            `http://localhost:3000/api/message/${selectedConversation._id}`,
+            `/api/message/${selectedConversation._id}`,
             {
               method: "GET",
               headers: {

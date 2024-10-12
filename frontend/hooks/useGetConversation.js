@@ -11,7 +11,7 @@ const useGetConversation = () => {
       setloading(true);
       try {
         // const res = await fetch("http://localhost:3000/api/user");
-        let response = await fetch("http://localhost:3000/api/user", {
+        let response = await fetch("/api/user", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
