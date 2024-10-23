@@ -40,3 +40,54 @@
 .read-the-docs {
   color: #888;
 } */
+
+
+@media only screen and (min-width: 400px) and (max-width: 770px) {
+  .actualContainer{
+      width: 100% !important;;
+      height: 100%;
+      /* border-radius: 0%; */
+  }
+
+  .sideBar{
+    display:none;
+    /* position:relative;
+    right: 999px; */
+  }
+
+  .actSideBar{
+    width: 100% !important;
+    margin-right: 55px;
+  }
+
+  .rightPhone{
+    width: 100% !important;
+    display: block;
+    /* position: relative; */
+    /* right: 20px; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+  }
+
+  .burger{
+    display: block !important;
+  }
+
+  .searchButt{
+    position: relative;
+    right: 55px;
+    width: 1.9rem !important;
+    height: 1.9rem !important;
+  }
+
+  .crossHidden{
+    display: block !important;
+  }
+
+  .messAfterResponse{
+    width: 100% !important;
+  }
+
+}
