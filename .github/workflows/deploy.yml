@@ -36,12 +36,15 @@ jobs:
           PORT: ${{ secrets.PORT }}
 
         run: |
+          echo "📦 Creating folder on EC2..."
+          ssh -o StrictHostKeyChecking=no ec2-user@${{ env.EC2_HOST }} "mkdir -p /home/ec2-user/tapchat-app"
+
           echo "📦 Uploading project files..."
-          scp -o StrictHostKeyChecking=no -r . ec2-user@${{ env.EC2_HOST }}:/home/ubuntu/tapchat
+          scp -o StrictHostKeyChecking=no -r . ec2-user@${{ env.EC2_HOST }}:/home/ec2-user/tapchat-app
 
           echo "🚀 Running deployment on EC2..."
           ssh -o StrictHostKeyChecking=no ec2-user@${{ env.EC2_HOST }} << 'EOF'
-            cd /home/ubuntu/tapchat
+            cd /home/ec2-user/tapchat-app
 
             echo "mongodb=${{ env.MONGO_URI }}" > .env
             echo "cookieToken=${{ env.JWT_SECRET }}" >> .env
