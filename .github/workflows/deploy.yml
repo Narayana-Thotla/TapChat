@@ -49,5 +49,5 @@ jobs:
             npm ci
             npm run build
 
-            echo "✅ Deployment completed successfully!"
+            echo "✅ Deployment completed successfully!!"
           EOF
