@@ -1,0 +1,53 @@
+name: Production deployment of Tapchat
+
+on:
+  push:
+    branches:[main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+
+jobs:
+  deploy:
+    name: Deploy to ${{ github.event.inputs.environment }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+       
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      - name: Deploy to ${{ github.event.inputs.environment }}
+        env:
+          ENVIRONMENT: ${{ github.event.inputs.environment }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          PORT: ${{ secrets.PORT }}
+
+        run: |
+          echo "📦 Uploading project files..."
+          scp -o StrictHostKeyChecking=no -r . ubuntu@${{ env.EC2_HOST }}:/home/ubuntu/tapchat
+
+          echo "🚀 Running deployment on EC2..."
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ env.EC2_HOST }} << 'EOF'
+            cd /home/ubuntu/tapchat
+
+            echo "mongodb=${{ env.MONGO_URI }}" > .env
+            echo "cookieToken=${{ env.JWT_SECRET }}" >> .env
+            echo "password=${{ env.PASSWORD }}" >> .env
+            echo "port=${{ env.PORT }}" >> .env
+
+            # Clean and rebuild on the server itself
+            npm ci
+            npm run build
+
+            echo "✅ Deployment completed successfully!"
+          EOF
