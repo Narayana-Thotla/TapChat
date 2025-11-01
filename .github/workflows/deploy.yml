@@ -54,6 +54,12 @@ jobs:
             # Clean and rebuild on the server itself
             npm ci
             npm run build
+            npm start
+
+            cd /home/ec2-user/tapchat-app/frontend
+            npm ci
+            npm run build
+            npm run dev
 
             echo "✅ Deployment completed successfully!!"
           EOF
