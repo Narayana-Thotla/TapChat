@@ -1,4 +1,4 @@
-import './tracing.js';
+import '../tracing.js';
 
 import express from "express";
 import dotenv from "dotenv";
@@ -43,7 +43,8 @@ const corsOptions = {
   credentials: true,  // Allow sending cookies and credentials
 };
 
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname,'/frontend','/dist')));

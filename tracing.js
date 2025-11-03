@@ -1,9 +1,15 @@
 // tracing.js
-const { NodeSDK } = require('@opentelemetry/sdk-node');
-const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
-const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
-const { OTLPMetricExporter } = require('@opentelemetry/exporter-metrics-otlp-http');
-const { PeriodicExportingMetricReader } = require('@opentelemetry/sdk-metrics');
+// const { NodeSDK } = require('@opentelemetry/sdk-node');
+// const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+// const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
+// const { OTLPMetricExporter } = require('@opentelemetry/exporter-metrics-otlp-http');
+// const { PeriodicExportingMetricReader } = require('@opentelemetry/sdk-metrics');
+
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
+import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 
 // SigNoz endpoint (adjust based on your setup)
 const SIGNOZ_ENDPOINT = process.env.SIGNOZ_ENDPOINT || 'http://localhost:4318';
@@ -45,4 +51,4 @@ process.on('SIGTERM', () => {
     .finally(() => process.exit(0));
 });
 
-module.exports = sdk;
+export default sdk;
