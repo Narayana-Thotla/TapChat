@@ -32,7 +32,7 @@ FROM node:18-alpine AS runner
 WORKDIR /app
 COPY --from=backend-builder /app /app
 
-EXPOSE 3000
+EXPOSE 3000 5173
 
 USER node
 
