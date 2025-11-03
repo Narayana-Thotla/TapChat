@@ -1,3 +1,5 @@
+import './tracing.js';
+
 import express from "express";
 import dotenv from "dotenv";
 import favicon from "serve-favicon";
