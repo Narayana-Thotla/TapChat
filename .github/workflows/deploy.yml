@@ -1,338 +1,338 @@
-name: Production deployment of Tapchat
+# name: Production deployment of Tapchat
 
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Deployment environment'
-        required: true
-        default: 'production'
+# on:
+#   push:
+#     branches: [main]
+#   workflow_dispatch:
+#     inputs:
+#       environment:
+#         description: 'Deployment environment'
+#         required: true
+#         default: 'production'
 
-jobs:
-  deploy:
-    name: Deploy to production server
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+# jobs:
+#   deploy:
+#     name: Deploy to production server
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v3
        
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.7.0
-        with:
-          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+#       - name: Set up SSH
+#         uses: webfactory/ssh-agent@v0.7.0
+#         with:
+#           ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
-      - name: Debug SSH connection
-        run: ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "echo connected successfully"
+#       - name: Debug SSH connection
+#         run: ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} "echo connected successfully"
 
-      - name: Deploy to ${{ github.event.inputs.environment }}
-        env:
-          ENVIRONMENT: production
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-          MONGO_URI: ${{ secrets.MONGO_URI }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          PASSWORD: ${{ secrets.PASSWORD }}
-          PORT: ${{ secrets.PORT }}
+#       - name: Deploy to ${{ github.event.inputs.environment }}
+#         env:
+#           ENVIRONMENT: production
+#           EC2_HOST: ${{ secrets.EC2_HOST }}
+#           MONGO_URI: ${{ secrets.MONGO_URI }}
+#           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+#           PASSWORD: ${{ secrets.PASSWORD }}
+#           PORT: ${{ secrets.PORT }}
 
-        run: |
-          echo "📦 Creating folder on EC2..."
-          ssh -o StrictHostKeyChecking=no ec2-user@${{ env.EC2_HOST }} "mkdir -p /home/ec2-user/tapchat-app"
+#         run: |
+#           echo "📦 Creating folder on EC2..."
+#           ssh -o StrictHostKeyChecking=no ec2-user@${{ env.EC2_HOST }} "mkdir -p /home/ec2-user/tapchat-app"
 
-          echo "📦 Uploading project files..."
-          scp -o StrictHostKeyChecking=no -r . ec2-user@${{ env.EC2_HOST }}:/home/ec2-user/tapchat-app
+#           echo "📦 Uploading project files..."
+#           scp -o StrictHostKeyChecking=no -r . ec2-user@${{ env.EC2_HOST }}:/home/ec2-user/tapchat-app
 
-          echo "🚀 Running deployment on EC2..."
-          ssh -o StrictHostKeyChecking=no ec2-user@${{ env.EC2_HOST }} << 'EOF'
-            cd /home/ec2-user/tapchat-app
+#           echo "🚀 Running deployment on EC2..."
+#           ssh -o StrictHostKeyChecking=no ec2-user@${{ env.EC2_HOST }} << 'EOF'
+#             cd /home/ec2-user/tapchat-app
 
-            echo "mongodb=${{ env.MONGO_URI }}" > .env
-            echo "cookieToken=${{ env.JWT_SECRET }}" >> .env
-            echo "password=${{ env.PASSWORD }}" >> .env
-            echo "port=${{ env.PORT }}" >> .env
+#             echo "mongodb=${{ env.MONGO_URI }}" > .env
+#             echo "cookieToken=${{ env.JWT_SECRET }}" >> .env
+#             echo "password=${{ env.PASSWORD }}" >> .env
+#             echo "port=${{ env.PORT }}" >> .env
 
-            # Clean and rebuild on the server itself
-            npm ci
-            npm run build
-            npm start
+#             # Clean and rebuild on the server itself
+#             npm ci
+#             npm run build
+#             npm start
 
-            cd /home/ec2-user/tapchat-app/frontend
-            npm ci
-            npm run build
-            npm run dev
+#             cd /home/ec2-user/tapchat-app/frontend
+#             npm ci
+#             npm run build
+#             npm run dev
 
-            echo "✅ Deployment completed successfully!!"
-          EOF
+#             echo "✅ Deployment completed successfully!!"
+#           EOF
 
-  #-----------------------------------------------------------------------------
+#   #-----------------------------------------------------------------------------
 
 
-  name: Production deployment of Tapchat
+#   name: Production deployment of Tapchat
 
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Deployment environment'
-        required: true
-        default: 'production'
+# on:
+#   push:
+#     branches: [main]
+#   workflow_dispatch:
+#     inputs:
+#       environment:
+#         description: 'Deployment environment'
+#         required: true
+#         default: 'production'
 
-env:
-  AWS_REGION: ap-south-1
-  ECR_REPOSITORY: tapchat-backend
-  CONTAINER_NAME: tapchat-backend
-  APP_PORT: 3000
+# env:
+#   AWS_REGION: ap-south-1
+#   ECR_REPOSITORY: tapchat-backend
+#   CONTAINER_NAME: tapchat-backend
+#   APP_PORT: 3000
 
-jobs:
-  deploy:
-    name: Deploy to production server
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+# jobs:
+#   deploy:
+#     name: Deploy to production server
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v3
        
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+#       - name: Configure AWS credentials
+#         uses: aws-actions/configure-aws-credentials@v4
+#         with:
+#           aws-access-key-id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+#           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+#       - name: Login to Amazon ECR
+#         id: login-ecr
+#         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+#       - name: Set up Docker Buildx
+#         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
-          platforms: linux/amd64
-          push: true
-          tags: |
-            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
-            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          build-args: |
-            BUILDKIT_INLINE_CACHE=1
+#       - name: Build and push Docker image
+#         uses: docker/build-push-action@v5
+#         with:
+#           context: .
+#           file: ./Dockerfile
+#           platforms: linux/amd64
+#           push: true
+#           tags: |
+#             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+#             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+#           cache-from: type=gha
+#           cache-to: type=gha,mode=max
+#           build-args: |
+#             BUILDKIT_INLINE_CACHE=1
 
-      - name: Clean up old ECR images
-        run: |
-          echo "🧹 Cleaning up old ECR images (keeping last 4)..."
+#       - name: Clean up old ECR images
+#         run: |
+#           echo "🧹 Cleaning up old ECR images (keeping last 4)..."
 
-          # Get all images sorted by push date (newest first)
-          IMAGES=$(aws ecr describe-images \
-            --repository-name ${{ env.ECR_REPOSITORY }} \
-            --region ${{ env.AWS_REGION }} \
-            --query 'imageDetails[?imageTags[?contains(@, `sha256:`)]].[imageDigest,imagePushedAt]' \
-            --output text | sort -k2 -r)
+#           # Get all images sorted by push date (newest first)
+#           IMAGES=$(aws ecr describe-images \
+#             --repository-name ${{ env.ECR_REPOSITORY }} \
+#             --region ${{ env.AWS_REGION }} \
+#             --query 'imageDetails[?imageTags[?contains(@, `sha256:`)]].[imageDigest,imagePushedAt]' \
+#             --output text | sort -k2 -r)
 
-          # Count total images
-          TOTAL_IMAGES=$(echo "$IMAGES" | wc -l)
-          echo "Total images found: $TOTAL_IMAGES"
+#           # Count total images
+#           TOTAL_IMAGES=$(echo "$IMAGES" | wc -l)
+#           echo "Total images found: $TOTAL_IMAGES"
 
-          if [ "$TOTAL_IMAGES" -gt 4 ]; then
-            # Get images to delete (skip first 4)
-            IMAGES_TO_DELETE=$(echo "$IMAGES" | tail -n +5 | awk '{print $1}')
+#           if [ "$TOTAL_IMAGES" -gt 4 ]; then
+#             # Get images to delete (skip first 4)
+#             IMAGES_TO_DELETE=$(echo "$IMAGES" | tail -n +5 | awk '{print $1}')
             
-            if [ -n "$IMAGES_TO_DELETE" ]; then
-              echo "Deleting $(echo "$IMAGES_TO_DELETE" | wc -l) old images..."
-              echo "$IMAGES_TO_DELETE" | while read -r digest; do
-                echo "Deleting image: $digest"
-                aws ecr batch-delete-image \
-                  --repository-name ${{ env.ECR_REPOSITORY }} \
-                  --region ${{ env.AWS_REGION }} \
-                  --image-ids imageDigest="$digest" || echo "Failed to delete $digest"
-              done
-              echo "✅ ECR cleanup completed"
-            fi
-          else
-            echo "✅ No cleanup needed (only $TOTAL_IMAGES images found)"
-          fi
+#             if [ -n "$IMAGES_TO_DELETE" ]; then
+#               echo "Deleting $(echo "$IMAGES_TO_DELETE" | wc -l) old images..."
+#               echo "$IMAGES_TO_DELETE" | while read -r digest; do
+#                 echo "Deleting image: $digest"
+#                 aws ecr batch-delete-image \
+#                   --repository-name ${{ env.ECR_REPOSITORY }} \
+#                   --region ${{ env.AWS_REGION }} \
+#                   --image-ids imageDigest="$digest" || echo "Failed to delete $digest"
+#               done
+#               echo "✅ ECR cleanup completed"
+#             fi
+#           else
+#             echo "✅ No cleanup needed (only $TOTAL_IMAGES images found)"
+#           fi
 
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.PROD_EC2_HOST }}
-          username: ${{ secrets.PROD_EC2_USERNAME }}
-          key: ${{ secrets.PROD_EC2_SSH_KEY }}
-          script: |
-            # Set variables
-            IMAGE_TAG="${{ github.sha }}"
-            ECR_REGISTRY="${{ steps.login-ecr.outputs.registry }}"
-            FULL_IMAGE="$ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG"
-            CONTAINER_NAME="${{ env.CONTAINER_NAME }}"
-            APP_DIR="/opt/$CONTAINER_NAME"
-            APP_PORT="${{ env.APP_PORT }}"
+#       - name: Deploy to EC2
+#         uses: appleboy/ssh-action@v1.0.3
+#         with:
+#           host: ${{ secrets.PROD_EC2_HOST }}
+#           username: ${{ secrets.PROD_EC2_USERNAME }}
+#           key: ${{ secrets.PROD_EC2_SSH_KEY }}
+#           script: |
+#             # Set variables
+#             IMAGE_TAG="${{ github.sha }}"
+#             ECR_REGISTRY="${{ steps.login-ecr.outputs.registry }}"
+#             FULL_IMAGE="$ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG"
+#             CONTAINER_NAME="${{ env.CONTAINER_NAME }}"
+#             APP_DIR="/opt/$CONTAINER_NAME"
+#             APP_PORT="${{ env.APP_PORT }}"
 
-            echo "🚀 Starting production deployment..."
-            echo "Image: $FULL_IMAGE"
-            echo "Container: $CONTAINER_NAME"
-            echo "Port: $APP_PORT"
+#             echo "🚀 Starting production deployment..."
+#             echo "Image: $FULL_IMAGE"
+#             echo "Container: $CONTAINER_NAME"
+#             echo "Port: $APP_PORT"
 
-            # Update system packages
-            sudo apt-get update
-            sudo apt-get install -y curl unzip nginx
+#             # Update system packages
+#             sudo apt-get update
+#             sudo apt-get install -y curl unzip nginx
 
-            # Install Docker if not installed
-            if ! command -v docker &> /dev/null; then
-              echo "📦 Installing Docker..."
-              curl -fsSL https://get.docker.com -o get-docker.sh
-              sudo sh get-docker.sh
-              sudo usermod -aG docker $USER
-              sudo systemctl start docker
-              sudo systemctl enable docker
-            fi
+#             # Install Docker if not installed
+#             if ! command -v docker &> /dev/null; then
+#               echo "📦 Installing Docker..."
+#               curl -fsSL https://get.docker.com -o get-docker.sh
+#               sudo sh get-docker.sh
+#               sudo usermod -aG docker $USER
+#               sudo systemctl start docker
+#               sudo systemctl enable docker
+#             fi
 
-            # Install AWS CLI if not installed
-            if ! command -v aws &> /dev/null; then
-              echo "📦 Installing AWS CLI..."
-              curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-              unzip awscliv2.zip
-              sudo ./aws/install
-              rm -rf aws awscliv2.zip
-            fi
+#             # Install AWS CLI if not installed
+#             if ! command -v aws &> /dev/null; then
+#               echo "📦 Installing AWS CLI..."
+#               curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+#               unzip awscliv2.zip
+#               sudo ./aws/install
+#               rm -rf aws awscliv2.zip
+#             fi
 
-            # Create application directory
-            sudo mkdir -p $APP_DIR
-            sudo chown $USER:$USER $APP_DIR
-            cd $APP_DIR
+#             # Create application directory
+#             sudo mkdir -p $APP_DIR
+#             sudo chown $USER:$USER $APP_DIR
+#             cd $APP_DIR
 
-            # Configure AWS credentials
-            echo "🔐 Configuring AWS credentials..."
-            mkdir -p ~/.aws
-            cat > ~/.aws/credentials << EOF
-            [default]
-            aws_access_key_id = ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
-            aws_secret_access_key = ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
-            EOF
+#             # Configure AWS credentials
+#             echo "🔐 Configuring AWS credentials..."
+#             mkdir -p ~/.aws
+#             cat > ~/.aws/credentials << EOF
+#             [default]
+#             aws_access_key_id = ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+#             aws_secret_access_key = ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+#             EOF
 
-            cat > ~/.aws/config << EOF
-            [default]
-            region = ${{ env.AWS_REGION }}
-            output = json
-            EOF
+#             cat > ~/.aws/config << EOF
+#             [default]
+#             region = ${{ env.AWS_REGION }}
+#             output = json
+#             EOF
 
-            # Login to ECR
-            echo "🔐 Logging into ECR..."
-            aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin $ECR_REGISTRY
+#             # Login to ECR
+#             echo "🔐 Logging into ECR..."
+#             aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin $ECR_REGISTRY
 
-            # Stop and remove existing container
-            echo "🛑 Stopping existing container..."
-            docker stop $CONTAINER_NAME 2>/dev/null || echo "No existing container to stop"
-            docker rm $CONTAINER_NAME 2>/dev/null || echo "No existing container to remove"
+#             # Stop and remove existing container
+#             echo "🛑 Stopping existing container..."
+#             docker stop $CONTAINER_NAME 2>/dev/null || echo "No existing container to stop"
+#             docker rm $CONTAINER_NAME 2>/dev/null || echo "No existing container to remove"
 
-            # Create .env file
-            echo "📝 Creating .env file..."
-            cat > .env << EOF
-            NODE_ENV=production
-            PORT=$APP_PORT
-            mongodb=${{ secrets.MONGO_URI }}
-            cookieToken=${{ env.JWT_SECRET }}
-            password=${{ env.PASSWORD }}
-            EOF
+#             # Create .env file
+#             echo "📝 Creating .env file..."
+#             cat > .env << EOF
+#             NODE_ENV=production
+#             PORT=$APP_PORT
+#             mongodb=${{ secrets.MONGO_URI }}
+#             cookieToken=${{ env.JWT_SECRET }}
+#             password=${{ env.PASSWORD }}
+#             EOF
 
-            # Setup Nginx
-            if [ ! -f /etc/nginx/sites-available/$CONTAINER_NAME ]; then
-              echo "📝 Setting up Nginx..."
-              cat > /tmp/nginx-config << EOF
-            # HTTP to  redirect
-            server {
-                listen 80;
-                server_name _;
+#             # Setup Nginx
+#             if [ ! -f /etc/nginx/sites-available/$CONTAINER_NAME ]; then
+#               echo "📝 Setting up Nginx..."
+#               cat > /tmp/nginx-config << EOF
+#             # HTTP to  redirect
+#             server {
+#                 listen 80;
+#                 server_name _;
 
-                location / {
-                    proxy_pass http://localhost:$APP_PORT;
-                    proxy_http_version 1.1;
-                    proxy_set_header Upgrade \$http_upgrade;
-                    proxy_set_header Connection 'upgrade';
-                    proxy_set_header Host \$host;
-                    proxy_cache_bypass \$http_upgrade;
-                }
-            }
-            EOF
+#                 location / {
+#                     proxy_pass http://localhost:$APP_PORT;
+#                     proxy_http_version 1.1;
+#                     proxy_set_header Upgrade \$http_upgrade;
+#                     proxy_set_header Connection 'upgrade';
+#                     proxy_set_header Host \$host;
+#                     proxy_cache_bypass \$http_upgrade;
+#                 }
+#             }
+#             EOF
 
-              sudo cp /tmp/nginx-config /etc/nginx/sites-available/$CONTAINER_NAME
-              sudo ln -sf /etc/nginx/sites-available/$CONTAINER_NAME /etc/nginx/sites-enabled/
-              sudo rm -f /etc/nginx/sites-enabled/default
-              sudo nginx -t
-              sudo systemctl start nginx
-              sudo systemctl enable nginx
-            fi
+#               sudo cp /tmp/nginx-config /etc/nginx/sites-available/$CONTAINER_NAME
+#               sudo ln -sf /etc/nginx/sites-available/$CONTAINER_NAME /etc/nginx/sites-enabled/
+#               sudo rm -f /etc/nginx/sites-enabled/default
+#               sudo nginx -t
+#               sudo systemctl start nginx
+#               sudo systemctl enable nginx
+#             fi
 
-            # Pull and run container
-            echo "📥 Pulling latest image..."
-            docker pull $FULL_IMAGE
+#             # Pull and run container
+#             echo "📥 Pulling latest image..."
+#             docker pull $FULL_IMAGE
 
-            echo "🚀 Starting container..."
-            docker run -d \
-              --name $CONTAINER_NAME \
-              --restart unless-stopped \
-              -p $APP_PORT:$APP_PORT \
-              --env-file .env \
-              -v $(pwd)/logs:/app/logs \
-              -v $(pwd)/images:/app/images \
-              -v $(pwd)/uploads:/app/uploads \
-              $FULL_IMAGE
+#             echo "🚀 Starting container..."
+#             docker run -d \
+#               --name $CONTAINER_NAME \
+#               --restart unless-stopped \
+#               -p $APP_PORT:$APP_PORT \
+#               --env-file .env \
+#               -v $(pwd)/logs:/app/logs \
+#               -v $(pwd)/images:/app/images \
+#               -v $(pwd)/uploads:/app/uploads \
+#               $FULL_IMAGE
 
-            # Check container status immediately
-            echo "📊 Container status after startup:"
-            docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+#             # Check container status immediately
+#             echo "📊 Container status after startup:"
+#             docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 
-            # Show container logs if it's not running
-            if ! docker ps | grep -q $CONTAINER_NAME; then
-              echo "❌ Container failed to start. Logs:"
-              docker logs $CONTAINER_NAME
-            fi
+#             # Show container logs if it's not running
+#             if ! docker ps | grep -q $CONTAINER_NAME; then
+#               echo "❌ Container failed to start. Logs:"
+#               docker logs $CONTAINER_NAME
+#             fi
 
-            # Wait for application to start
-            echo "⏳ Waiting for application to start..."
-            sleep 30
+#             # Wait for application to start
+#             echo "⏳ Waiting for application to start..."
+#             sleep 30
 
-            # Health check
-            echo "🏥 Performing health check..."
-            max_attempts=10
-            attempt=1
+#             # Health check
+#             echo "🏥 Performing health check..."
+#             max_attempts=10
+#             attempt=1
 
-            while [ $attempt -le $max_attempts ]; do
-              if curl -f http://localhost:$APP_PORT/health > /dev/null 2>&1; then
-                echo "✅ Application is healthy and running!"
-                break
-              else
-                echo "⚠️ Health check attempt $attempt failed. Retrying in 10 seconds..."
-                sleep 10
-                attempt=$((attempt + 1))
-              fi
-            done
+#             while [ $attempt -le $max_attempts ]; do
+#               if curl -f http://localhost:$APP_PORT/health > /dev/null 2>&1; then
+#                 echo "✅ Application is healthy and running!"
+#                 break
+#               else
+#                 echo "⚠️ Health check attempt $attempt failed. Retrying in 10 seconds..."
+#                 sleep 10
+#                 attempt=$((attempt + 1))
+#               fi
+#             done
 
-            # signoz integration
-            echo "📥 changes for signoz"
+#             # signoz integration
+#             echo "📥 changes for signoz"
             
-      - name: Set up Docker Buildx for signoz integration
-        uses: docker/setup-buildx-action@v3
+#       - name: Set up Docker Buildx for signoz integration
+#         uses: docker/setup-buildx-action@v3
 
-      - name: Build and push Docker image for signoz integration
-        uses: docker/build-push-action@v5
-        run: |
-          git clone https://github.com/SigNoz/signoz.git
-        with:
-          context: .
-          file: signoz/deploy/docker/docker-compose.yaml
-          platforms: linux/amd64
-          push: true
-          tags: |
-            ${{ steps.login-ecr.outputs.registry }}/signoz-integration:${{ github.sha }}
-            ${{ steps.login-ecr.outputs.registry }}/signoz-integration:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          build-args: |
-            BUILDKIT_INLINE_CACHE=1
+#       - name: Build and push Docker image for signoz integration
+#         uses: docker/build-push-action@v5
+#         run: |
+#           git clone https://github.com/SigNoz/signoz.git
+#         with:
+#           context: .
+#           file: signoz/deploy/docker/docker-compose.yaml
+#           platforms: linux/amd64
+#           push: true
+#           tags: |
+#             ${{ steps.login-ecr.outputs.registry }}/signoz-integration:${{ github.sha }}
+#             ${{ steps.login-ecr.outputs.registry }}/signoz-integration:latest
+#           cache-from: type=gha
+#           cache-to: type=gha,mode=max
+#           build-args: |
+#             BUILDKIT_INLINE_CACHE=1
 
 #-----------------------------------------------------------------------------
 
