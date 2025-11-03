@@ -350,7 +350,7 @@ on:
         default: 'production'
 
 env:
-  AWS_REGION: ap-south-1
+  AWS_REGION: us-east-1
   ECR_REPOSITORY: tapchat-backend
   CONTAINER_NAME: tapchat-backend
   APP_PORT: 3000
