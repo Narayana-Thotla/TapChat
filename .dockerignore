@@ -1,0 +1,4 @@
+node_modules
+.github
+.github/workflows/deploy.yml
+frontend/node_modules

@@ -18,7 +18,11 @@ FROM node:18-alpine AS backend-builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
-COPY . .
+COPY backend ./backend
+COPY tracing.js ./
+COPY .env ./
+COPY public ./public
+
 
 # Copy built frontend from previous stage into backend's public directory
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
@@ -34,6 +38,10 @@ COPY --from=backend-builder /app /app
 
 EXPOSE 3000 5173
 
+# Add healthcheck
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD wget --quiet --tries=1 --spider http://localhost:3000/health || exit 1
+
 USER node
 
-CMD ["node", "server.js"]
+CMD ["npm", "start"]
