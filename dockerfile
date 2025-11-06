@@ -20,7 +20,7 @@ COPY package*.json ./
 RUN npm ci --only=production
 COPY backend ./backend
 COPY tracing.js ./
-COPY .env ./
+# COPY .env ./
 COPY public ./public
 
 
