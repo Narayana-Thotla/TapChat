@@ -538,35 +538,35 @@ jobs:
             # ============================================
             echo "📊 Setting up SigNoz..."
             
-            # if [ ! -d "$SIGNOZ_DIR" ]; then
-            #   echo "📥 Cloning SigNoz repository..."
-            #   sudo mkdir -p $SIGNOZ_DIR
-            #   sudo chown $USER:$USER $SIGNOZ_DIR
-            #   cd $SIGNOZ_DIR
-            #   git clone https://github.com/SigNoz/signoz.git .
-            #   cd deploy
+            if [ ! -d "$SIGNOZ_DIR" ]; then
+              echo "📥 Cloning SigNoz repository..."
+              sudo mkdir -p $SIGNOZ_DIR
+              sudo chown $USER:$USER $SIGNOZ_DIR
+              cd $SIGNOZ_DIR
+              git clone https://github.com/SigNoz/signoz.git .
+              cd deploy
               
-            #   echo "🚀 Starting SigNoz services..."
-            #   docker-compose -f docker/clickhouse-setup/docker-compose.yaml up -d
+              echo "🚀 Starting SigNoz services..."
+              docker-compose -f docker/clickhouse-setup/docker-compose.yaml up -d
               
-            #   echo "⏳ Waiting for SigNoz to be ready (60 seconds)..."
-            #   sleep 60
+              echo "⏳ Waiting for SigNoz to be ready (60 seconds)..."
+              sleep 60
               
-            #   echo "✅ SigNoz is running!"
-            #   echo "📊 SigNoz UI: http://$(curl -s ifconfig.me):3301"
-            # else
-            #   echo "✅ SigNoz already installed"
-            #   cd $SIGNOZ_DIR/deploy
+              echo "✅ SigNoz is running!"
+              echo "📊 SigNoz UI: http://$(curl -s ifconfig.me):3301"
+            else
+              echo "✅ SigNoz already installed"
+              cd $SIGNOZ_DIR/deploy
               
-            #   # Check if SigNoz is running, if not start it
-            #   if ! docker-compose -f docker/clickhouse-setup/docker-compose.yaml ps | grep -q "Up"; then
-            #     echo "🚀 Starting SigNoz services..."
-            #     docker-compose -f docker/clickhouse-setup/docker-compose.yaml up -d
-            #     sleep 30
-            #   else
-            #     echo "✅ SigNoz is already running"
-            #   fi
-            # fi
+              # Check if SigNoz is running, if not start it
+              if ! docker-compose -f docker/clickhouse-setup/docker-compose.yaml ps | grep -q "Up"; then
+                echo "🚀 Starting SigNoz services..."
+                docker-compose -f docker/clickhouse-setup/docker-compose.yaml up -d
+                sleep 30
+              else
+                echo "✅ SigNoz is already running"
+              fi
+            fi
 
             # ============================================
             # DEPLOY APPLICATION
@@ -588,9 +588,9 @@ jobs:
             password=${{ secrets.PASSWORD }}
             
             # SigNoz Configuration
-            # SIGNOZ_ENDPOINT=http://host.docker.internal:4318
-            # SERVICE_NAME=tapchat-backend
-            # ENVFILE
+            SIGNOZ_ENDPOINT=http://host.docker.internal:4318
+            SERVICE_NAME=tapchat-backend
+            ENVFILE
 
             # Setup Nginx
             if [ ! -f /etc/nginx/sites-available/$CONTAINER_NAME ]; then
@@ -698,7 +698,7 @@ jobs:
             echo "✅ DEPLOYMENT SUCCESSFUL!"
             echo "================================================"
             echo "🌐 Application URL: http://$(curl -s ifconfig.me)"
-            # echo "📊 SigNoz Dashboard: http://$(curl -s ifconfig.me):3301"
+            echo "📊 SigNoz Dashboard: http://$(curl -s ifconfig.me):3301"
             echo "📊 Or via Nginx: http://$(curl -s ifconfig.me)/signoz/"
             echo "================================================"
             echo "Container logs (last 20 lines):"
