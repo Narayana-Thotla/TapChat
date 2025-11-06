@@ -423,15 +423,47 @@ jobs:
             echo "✅ No cleanup needed (only $TOTAL_IMAGES images found)"
           fi
 
+
+
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PROD_EC2_SSH_KEY }}" > ~/.ssh/deploy_key.pem
+          chmod 600 ~/.ssh/deploy_key.pem
+          
+          # Verify key format
+          if head -1 ~/.ssh/deploy_key.pem | grep -q "BEGIN"; then
+            echo "✅ SSH key format looks correct"
+          else
+            echo "⚠️ SSH key might be base64 encoded, decoding..."
+            echo "${{ secrets.PROD_EC2_SSH_KEY }}" | base64 -d > ~/.ssh/deploy_key.pem
+            chmod 600 ~/.ssh/deploy_key.pem
+          fi
+          
+          # Test SSH connection
+          echo "Testing SSH connectivity..."
+          ssh -i ~/.ssh/deploy_key.pem \
+            -o StrictHostKeyChecking=no \
+            -o ConnectTimeout=10 \
+            ${{ secrets.PROD_EC2_USERNAME }}@${{ secrets.PROD_EC2_HOST }} \
+            "echo '✅ SSH connection successful!'"
+
+
       - name: Deploy Application and SigNoz to EC2
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.PROD_EC2_HOST }}
-          username: ${{ secrets.PROD_EC2_USERNAME }}
-          key: ${{ secrets.PROD_EC2_SSH_KEY }}
-          script: |
-            set -e
+        # uses: appleboy/ssh-action@v1.0.3
+        # with:
+        #   host: ${{ secrets.PROD_EC2_HOST }}
+        #   username: ${{ secrets.PROD_EC2_USERNAME }}
+        #   key: ${{ secrets.PROD_EC2_SSH_KEY }}
+        #   script: |
+        #     set -e
             
+        run: |
+          # Create deployment script
+          cat > deploy.sh << 'DEPLOY_SCRIPT'
+          #!/bin/bash
+          #!/bin/bash
+            set -e
             # Set variables
             IMAGE_TAG="${{ github.sha }}"
             ECR_REGISTRY="${{ steps.login-ecr.outputs.registry }}"
